@@ -6,6 +6,7 @@ facts and functionalities of graphs.
 """
 
 from vertex import Vertex
+from random import choice
 
 
 class Graph:
@@ -55,12 +56,13 @@ class Graph:
         queue = [start]  # A 'queue' for storing vertices to check later
         seen = {start}  # A set of all the seen vertices
 
+        yield start
         while len(queue):
-            for vertice in self.vertices[queue.pop(0)].get_neighbors():
-                if vertice.id not in seen:
-                    yield vertice.id
-                    seen.add(vertice.id)
-                    queue.append(vertice.id)
+            for vertex in self.vertices[queue.pop(0)].get_neighbors():
+                if vertex not in seen:
+                    yield vertex
+                    seen.add(vertex)
+                    queue.append(vertex)
 
     def shortest_path_between(self, start, end):
 
@@ -93,6 +95,35 @@ class Graph:
                 else:
                     seen.add(neighbor)
                     return self.depth_first_traversal(neighbor, end, visit, seen)
+
+    def clique(self, start=None):
+        if start is None:
+            start = choice(self.get_vertices())
+
+        clique_list = set([start])
+        for vertex in self.get_vertices():
+
+            in_clique = True
+
+            for clique_vetex in clique_list:
+                if not self.get_vertex(clique_vetex).is_neighbors_with(vertex):
+                    in_clique = False
+            if in_clique:
+                clique_list.add(vertex)
+
+        return clique_list
+
+    def diameter(self):
+        vert_keys = self.get_vertices()
+        longest_shortest_path = 0
+        while len(vert_keys) > 0:
+            current_vert = vert_keys.pop()
+            for other_vertex in vert_keys:
+                dist = len(self.shortest_path_between(
+                    current_vert, other_vertex))
+                if dist > longest_shortest_path:
+                    longest_shortest_path = dist
+        return longest_shortest_path
 
     def __iter__(self):
         """
